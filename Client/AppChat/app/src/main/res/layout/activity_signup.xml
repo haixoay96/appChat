@@ -20,12 +20,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-       <!-- <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="72dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="24dp"
-            android:src="@drawable/logo" />-->
+        <!-- <ImageView
+             android:layout_width="wrap_content"
+             android:layout_height="72dp"
+             android:layout_gravity="center_horizontal"
+             android:layout_marginBottom="24dp"
+             android:src="@drawable/logo" />-->
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -55,6 +55,19 @@
                 android:inputType="textPassword" />
 
         </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Repassword" />
+
+        </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
             android:textColor="@color/colorAccent"
@@ -64,24 +77,14 @@
             android:layout_marginTop="24dp"
             android:padding="12dp"
             android:textAllCaps="false"
-            android:text="Login" />
-
-        <TextView
-            android:onClick="signUp"
-            android:textColor="@color/colorAccent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:gravity="center"
-            android:text="No account yet? Create one"
-            android:textSize="16dip" />
+            android:text="Create Account" />
         <TextView
             android:textColor="@color/colorAccent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
             android:gravity="center"
-            android:text="Forget password"
+            android:text="Already a member? Login"
             android:textSize="16dip" />
 
 
