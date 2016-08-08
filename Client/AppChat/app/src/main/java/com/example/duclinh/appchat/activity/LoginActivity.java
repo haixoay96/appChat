@@ -1,6 +1,7 @@
 package com.example.duclinh.appchat.activity;
 
 import android.content.Intent;
+import android.support.annotation.StyleRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -13,7 +14,6 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SignupActivity.class);
         startActivity(intent);
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

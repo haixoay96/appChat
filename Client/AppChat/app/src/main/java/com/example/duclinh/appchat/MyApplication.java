@@ -29,5 +29,6 @@ public class MyApplication extends Application  {
         if(socket.connected()){
             Log.d("thanh", "thanh cong");
         }*/
+
     }
 }
