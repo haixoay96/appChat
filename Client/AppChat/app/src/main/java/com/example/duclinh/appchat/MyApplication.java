@@ -12,23 +12,20 @@ import java.net.URISyntaxException;
  * Created by duclinh on 07/08/2016.
  */
 public class MyApplication extends Application  {
-    private Socket socket = null;
+    private static Socket socket = null;
     {
         try {
-            socket = IO.socket("http://192.168.0.113:3000");
+            socket = IO.socket("http://192.168.0.128:3000");
             socket.connect();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
     }
-
+    public static Socket getSocket(){
+        return socket;
+    }
     @Override
     public void onCreate() {
         super.onCreate();
-        /*socket.connect();
-        if(socket.connected()){
-            Log.d("thanh", "thanh cong");
-        }*/
-
     }
 }

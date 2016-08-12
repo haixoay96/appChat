@@ -13,18 +13,11 @@
         <TextView
             android:fontFamily="cursive"
             android:textStyle="italic|bold"
-            android:textSize="35sp"
+            android:textSize="40sp"
             android:layout_gravity="center"
             android:text="Chat chit !"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
-        <!-- <ImageView
-             android:layout_width="wrap_content"
-             android:layout_height="72dp"
-             android:layout_gravity="center_horizontal"
-             android:layout_marginBottom="24dp"
-             android:src="@drawable/logo" />-->
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -34,6 +27,7 @@
             android:orientation="vertical">
 
             <EditText
+                android:id="@+id/activity_signup_account"
                 android:lines="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,6 +43,7 @@
             android:layout_marginTop="8dp">
 
             <EditText
+                android:id="@+id/activity_signup_password"
                 android:lines="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -64,6 +59,7 @@
             android:orientation="vertical">
 
             <EditText
+                android:id="@+id/activity_signup_repassword"
                 android:inputType="textPassword"
                 android:lines="1"
                 android:layout_width="match_parent"
@@ -73,6 +69,7 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
+            android:id="@+id/activity_signup_createaccount"
             android:textColor="@color/colorAccent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
