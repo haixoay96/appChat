@@ -25,10 +25,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.SignupActivity" />
-        <activity android:name=".demoActivity"
-            android:theme="@style/Base.Theme.AppCompat.Light.Dialog.FixedSize">
-
-        </activity>
+        <activity
+            android:name=".demoActivity"
+            android:theme="@style/Base.Theme.AppCompat.Light.Dialog.FixedSize"></activity>
+        <activity android:name=".activity.UsersOnlineActivity"></activity>
     </application>
 
 </manifest>
