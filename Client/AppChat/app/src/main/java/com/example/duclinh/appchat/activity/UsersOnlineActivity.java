@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
@@ -19,6 +20,7 @@ import com.example.duclinh.appchat.orther.DividerItemDecoration;
 
 import java.util.ArrayList;
 
+import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
 public class UsersOnlineActivity extends AppCompatActivity {
@@ -42,7 +44,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
         adapterUsersOnline = new AdapterUsersOnline(listUsersOnline);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         listUsers.setLayoutManager(layoutManager);
-        listUsers.setItemAnimator(new SlideInUpAnimator(new OvershootInterpolator(1f)));
+        listUsers.setItemAnimator(new DefaultItemAnimator());
         listUsers.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         listUsers.setAdapter(adapterUsersOnline);
         adapterUsersOnline.notifyDataSetChanged();

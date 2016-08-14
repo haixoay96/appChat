@@ -16,7 +16,7 @@
         <item name="android:background">@color/colorPrimary</item>
     </style>
     <style name="Them_activity_users_online" parent="AppTheme">
-        <item name="colorPrimaryDark">#ffffff</item>
+        <item name="colorPrimaryDark">#9cbaadad</item>
         <item name="android:background">#ffffff</item>
     </style>
 
