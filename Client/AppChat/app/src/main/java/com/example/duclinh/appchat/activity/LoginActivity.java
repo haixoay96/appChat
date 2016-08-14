@@ -1,7 +1,6 @@
 package com.example.duclinh.appchat.activity;
 
 import android.content.Intent;
-import android.support.annotation.StyleRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
@@ -10,7 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.duclinh.appchat.MyApplication;
+import com.example.duclinh.appchat.orther.MyApplication;
 import com.example.duclinh.appchat.R;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
@@ -23,6 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText password;
     private AppCompatButton login;
     private TextView createAccount;
+    private TextView forgetPassword;
 
     private Socket socket;
 
@@ -90,6 +90,14 @@ public class LoginActivity extends AppCompatActivity {
                 startActivityForResult(intent, 100);
             }
         });
+        forgetPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LoginActivity.this, UsersOnlineActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void controllView() {
@@ -97,5 +105,6 @@ public class LoginActivity extends AppCompatActivity {
         password = (EditText) findViewById(R.id.activity_login_password);
         login = (AppCompatButton) findViewById(R.id.activity_login_login);
         createAccount = (TextView) findViewById(R.id.activity_login_createaccount);
+        forgetPassword = (TextView) findViewById(R.id.activity_login_forgetpassword);
     }
 }

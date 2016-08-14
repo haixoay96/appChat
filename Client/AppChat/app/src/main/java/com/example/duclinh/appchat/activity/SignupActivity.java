@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.duclinh.appchat.MyApplication;
+import com.example.duclinh.appchat.orther.MyApplication;
 import com.example.duclinh.appchat.R;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;

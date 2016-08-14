@@ -1,4 +1,4 @@
-package com.example.duclinh.appchat;
+package com.example.duclinh.appchat.orther;
 
 import android.app.Application;
 import android.util.Log;

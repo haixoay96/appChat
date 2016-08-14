@@ -1,7 +1,5 @@
 package com.example.duclinh.appchat.data;
 
-import com.mikhaellopez.circularimageview.CircularImageView;
-
 /**
  * Created by haixo on 8/13/2016.
  */
@@ -32,11 +30,11 @@ public class ItemUsersOnline {
         this.status = status;
     }
 
-    public CircularImageView getAvatar() {
+    public int getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(CircularImageView avatar) {
+    public void setAvatar(int avatar) {
         this.avatar = avatar;
     }
 }
