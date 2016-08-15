@@ -3,10 +3,12 @@ package com.example.duclinh.appchat.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +26,7 @@ import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
 public class UsersOnlineActivity extends AppCompatActivity {
+    private Toolbar toolbar;
     private RecyclerView listUsers;
     private AdapterUsersOnline adapterUsersOnline;
     private ArrayList<ItemUsersOnline> listUsersOnline;
@@ -34,11 +37,12 @@ public class UsersOnlineActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users_online);
         controlView();
-        controlEvent();
         handleLogic();
+        controlEvent();
     }
 
     private void handleLogic() {
+        setSupportActionBar(toolbar);
         listUsersOnline = new ArrayList<ItemUsersOnline>();
         prepareData();
         adapterUsersOnline = new AdapterUsersOnline(listUsersOnline);
@@ -83,6 +87,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
 
         listUsers = (RecyclerView) findViewById(R.id.activity_users_online_listusers);
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.activity_users_online_swiperefresh);
+        toolbar = (Toolbar) findViewById(R.id.activity_users_online_toolbar);
     }
     private void prepareData(){
         listUsersOnline.add(new ItemUsersOnline(R.drawable.a1, "Đức Linh", "Vui quá các bạn ơi!"));

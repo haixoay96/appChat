@@ -10,6 +10,7 @@
         android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar
+            android:id="@+id/activity_users_online_toolbar"
             app:titleTextColor="#695a5a"
             app:title="All users online"
             android:layout_width="match_parent"
