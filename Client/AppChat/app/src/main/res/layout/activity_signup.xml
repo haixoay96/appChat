@@ -80,6 +80,7 @@
             android:textAllCaps="false"
             android:text="Create Account" />
         <TextView
+            android:id="@+id/activity_signup_alreadyaccount"
             android:textColor="@color/colorAccent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

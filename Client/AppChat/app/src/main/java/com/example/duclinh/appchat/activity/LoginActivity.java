@@ -1,6 +1,7 @@
 package com.example.duclinh.appchat.activity;
 
 import android.content.Intent;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
@@ -9,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.duclinh.appchat.fragment.ForgetPasswordFragment;
 import com.example.duclinh.appchat.orther.MyApplication;
 import com.example.duclinh.appchat.R;
 import com.github.nkzawa.emitter.Emitter;
@@ -67,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 socket.emit("login", jsonObject);
-                socket.on("resultLogin", new Emitter.Listener() {
+                socket.once("resultLogin", new Emitter.Listener() {
                     @Override
                     public void call(final Object... args) {
                         LoginActivity.this.runOnUiThread(new Runnable() {
@@ -93,8 +95,9 @@ public class LoginActivity extends AppCompatActivity {
         forgetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this, UsersOnlineActivity.class);
-                startActivity(intent);
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                ForgetPasswordFragment fragment = ForgetPasswordFragment.newInstance("Rest password");
+                fragment.show(fragmentManager, "fragment");
             }
         });
 

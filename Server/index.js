@@ -7,7 +7,17 @@ var http = require('http').createServer(app).listen(3000, function () {
 var io = require('socket.io')(http);
 var emailCheck = require('email-check');
 var fs = require('fs');
-
+var formidable = require('formidable');
+var nodemailer = require('nodemailer');
+var path = require('path');
+var transporter = nodemailer.createTransport('smtps://koolsok96%40gmail.com:namnamnam@smtp.gmail.com');
+var mailOption = {
+	from: 'Admin App chat<koolsok96@gmail.com>',
+	to : 'haixoay96@gmail.com',
+	subject: 'Khoi phuc pass',
+	text: 'pass is 1000',
+	html: '<b>Password cua ban la 123456</b>'
+};
 /*
 format profileAccount
 {
@@ -35,6 +45,8 @@ const ERROR_SUCCESS = 100;
 const ERROR_ALREADY = 101;
 const ERROR_MAIL = 102;
 const ERROR_INVAILD = 103;
+const ERROR_NOT_FOUND = 104;
+const ERROR_TRY_AGAIN = 105
 
 var userOnline = [];
 
@@ -54,7 +66,7 @@ io.on('connection', function (socket) {
 				console.log(res);
 				fs.readFile(__dirname +'/data/users.json','utf8', function(err,users) {
 					var objectUsers = JSON.parse(users);
-					if(find.findIndex(objectUsers.users, {account:data.account}) ===-1){
+					if(find.findIndex(objectUsers.list, {account:data.account}) ===-1){
 						// when account not exists
 						socket.emit('resultSignUp', {
 							status: ERROR_SUCCESS
@@ -111,6 +123,37 @@ io.on('connection', function (socket) {
 			});
 	});
 
+	socket.on('forgetPassword', function (data) {
+		console.log('reset');
+		fs.readFile(__dirname + '/data/users.json', 'utf8', function (err, users) {
+			var objectUsers = JSON.parse(users);
+			var index = find.findIndex(objectUsers.list, data);
+			if(index ===-1){
+				socket.emit('resultForgetPassword', {
+					status:ERROR_NOT_FOUND,
+				});
+			}
+			else {
+				mailOption.to = objectUsers.list[index].account;
+				transporter.sendMail(mailOption, function (error, infor) {
+					if(error){
+						console.log(error);
+						socket.emit('resultForgetPassword', {
+							status:ERROR_TRY_AGAIN,
+						});
+					}
+					else{
+						console.log(infor);
+						socket.emit('resultForgetPassword', {
+							status:ERROR_SUCCESS,
+						});
+					}
+				});
+
+			}
+		});
+	});
+
 
 
 
@@ -120,5 +163,47 @@ io.on('connection', function (socket) {
 			var usernameReceiver = userName[indexReceiver];
 
 	});
-	console.log('co nguoi connect');
+	socket.on('disconnect', function () {
+		console.log('socket id '+ socket.id +'  disconnected !');
+	});
+
+	console.log('co nguoi connect' + socket.id);
 });
+
+
+// handle http
+ app.post('/set/avatar/:account/:password', function (req,res) {
+ 	// dosomething
+ 	var user = {
+ 		account:req.params.account,
+ 		password:req.params.password
+ 	};
+ 	var form = new formidable.IncomingForm();
+ 	form.encoding = 'utf8';
+ 	form.uploadDir =  path.join(__dirname,'/data/avatar');
+ 	form.on('file', function (field, file) {
+ 		fs.readFile(__dirname+'/data/users.json', 'utf8', function (err, users) {
+ 			var objectUsers = JSON.parse(users);
+ 			var index = find.findIndex(objectUsers.list, user);
+ 			if(index !== -1){
+ 				fs.rename(file.path, path.join(form.uploadDir,user.account+ file.name), function (err) {
+ 					if(!err){
+ 						objectUsers.list[index].avatar = file.path;
+ 						console.log(file.path);
+ 					}
+ 					
+ 				});
+ 			}
+ 		});
+
+ 	});
+ 	form.on('end', function () {
+ 		res.end('success');
+ 	});
+ 	form.on('error', function (error) {
+ 		console.log(error);
+ 	});
+
+ 	form.parse(req);
+
+ });

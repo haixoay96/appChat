@@ -15,7 +15,7 @@ public class MyApplication extends Application  {
     private static Socket socket = null;
     {
         try {
-            socket = IO.socket("http://192.168.0.128:3000");
+            socket = IO.socket("http://192.168.0.140:3000");
             socket.connect();
         } catch (URISyntaxException e) {
             e.printStackTrace();

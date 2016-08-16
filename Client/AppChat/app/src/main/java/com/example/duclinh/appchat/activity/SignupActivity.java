@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.duclinh.appchat.orther.MyApplication;
@@ -21,12 +22,14 @@ public class SignupActivity extends AppCompatActivity {
     private EditText password;
     private EditText rePassword;
     private AppCompatButton createAccount;
-    private Socket socket = MyApplication.getSocket();
+    private TextView alreadyAccount;
+    private Socket socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        socket = MyApplication.getSocket();
         controlView();
         controlEvent();
         String textAccount = getIntent().getStringExtra("account");
@@ -38,9 +41,17 @@ public class SignupActivity extends AppCompatActivity {
         password = (EditText) findViewById(R.id.activity_signup_password);
         rePassword = (EditText) findViewById(R.id.activity_signup_repassword);
         createAccount = (AppCompatButton) findViewById(R.id.activity_signup_createaccount);
+        alreadyAccount = (TextView) findViewById(R.id.activity_signup_alreadyaccount);
     }
 
     private void controlEvent() {
+
+        alreadyAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
         createAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,7 +78,7 @@ public class SignupActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 socket.emit("signUp", jsonObject);
-                socket.on("resultSignUp", new Emitter.Listener() {
+                socket.once("resultSignUp", new Emitter.Listener() {
                     @Override
                     public void call(final Object... args) {
                         SignupActivity.this.runOnUiThread(new Runnable() {
