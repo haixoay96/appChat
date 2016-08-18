@@ -48,7 +48,7 @@ const ERROR_INVAILD = 103;
 const ERROR_NOT_FOUND = 104;
 const ERROR_TRY_AGAIN = 105
 
-var userOnline = [];
+var listUsersOnline = [];
 
 // when there is person connect
 io.on('connection', function (socket) {
@@ -64,15 +64,16 @@ io.on('connection', function (socket) {
 			if(res){
 				// when email invaild
 				console.log(res);
-				fs.readFile(__dirname +'/data/users.json','utf8', function(err,users) {
+				fs.readFile(__dirname +'/public/data/users.json','utf8', function(err,users) {
 					var objectUsers = JSON.parse(users);
 					if(find.findIndex(objectUsers.list, {account:data.account}) ===-1){
 						// when account not exists
+						console.log('thanh cong');
 						socket.emit('resultSignUp', {
 							status: ERROR_SUCCESS
 						});
-						objectUsers.list.push({account:data.account, password:data.password});
-						fs.writeFile(__dirname+'/data/users.json', JSON.stringify(objectUsers, null, 2),'utf8', function (err) {
+						objectUsers.list.push({account:data.account, password:data.password,avatar:'/data/avatar/defaultavatar.jpg'});
+						fs.writeFile(__dirname+'/public/data/users.json', JSON.stringify(objectUsers, null, 2),'utf8', function (err) {
 						console.log(err);
 						});
 					}
@@ -98,21 +99,28 @@ io.on('connection', function (socket) {
 			console.log(err);
 			socket.emit('resultSignUp', {
 				status: ERROR_MAIL
-			})
+			});
 		});
 	});
 
 	// when there is login
 	socket.on('login', function (data) {
 		console.log(data);
-		fs.readFile(__dirname +'/data/users.json','utf8', function(err,users) {
+		fs.readFile(__dirname +'/public/data/users.json','utf8', function(err,users) {
 			console.log(users);
 			var objectUsers = JSON.parse(users);
 			if(find.findIndex(objectUsers.list, {account:data.account, password:data.password})!==-1){
 				console.log('Thanh cong');
 				socket.emit('resultLogin', {
-					status:ERROR_SUCCESS
+					status:ERROR_SUCCESS,
+					listUsersOnline: listUsersOnline
 				});
+				listUsersOnline.push({
+					account:data.account,
+					socket: socket.id,
+					avatar: '/data/avatar/defaultavatar.jpg'
+				});
+				socket.broadcast.emit('addUser', listUsersOnline[listUsersOnline.length-1]);
 			}
 			else{
 				console.log('that bai');
@@ -125,7 +133,7 @@ io.on('connection', function (socket) {
 
 	socket.on('forgetPassword', function (data) {
 		console.log('reset');
-		fs.readFile(__dirname + '/data/users.json', 'utf8', function (err, users) {
+		fs.readFile(__dirname + '/public/data/users.json', 'utf8', function (err, users) {
 			var objectUsers = JSON.parse(users);
 			var index = find.findIndex(objectUsers.list, data);
 			if(index ===-1){
@@ -155,21 +163,28 @@ io.on('connection', function (socket) {
 	});
 
 
-
-
 	socket.on('sendMessage', function (data) {
-			// data = {username : name , data : dat}
-			var indexReceiver = find.findIndex(userName, {username:data.username});
-			var usernameReceiver = userName[indexReceiver];
+			// data = {account:name , message:mess}
+			var indexReceiver = find.findIndex(listUsersOnline, {account:data.account});
+			var to = listUsersOnline[indexReceiver];
+			socket.broadcast.to(to.socket).emit('receiveMessage', data);
 
 	});
 	socket.on('disconnect', function () {
-		console.log('socket id '+ socket.id +'  disconnected !');
+		console.log('socket id '+ socket.id +' disconnected !');
+		var index = find.findIndex(listUsersOnline, {socket:socket.id});
+		if(index !==-1){
+			socket.broadcast.emit('removeUser', listUsersOnline[index]);
+			listUsersOnline.splice(index,1);
+		}
+
 	});
 
 	console.log('co nguoi connect' + socket.id);
 });
 
+//static file
+app.use(express.static('public'));
 
 // handle http
  app.post('/set/avatar/:account/:password', function (req,res) {
@@ -180,9 +195,9 @@ io.on('connection', function (socket) {
  	};
  	var form = new formidable.IncomingForm();
  	form.encoding = 'utf8';
- 	form.uploadDir =  path.join(__dirname,'/data/avatar');
+ 	form.uploadDir =  path.join(__dirname,'/public/data/avatar');
  	form.on('file', function (field, file) {
- 		fs.readFile(__dirname+'/data/users.json', 'utf8', function (err, users) {
+ 		fs.readFile(__dirname+'/public/data/users.json', 'utf8', function (err, users) {
  			var objectUsers = JSON.parse(users);
  			var index = find.findIndex(objectUsers.list, user);
  			if(index !== -1){

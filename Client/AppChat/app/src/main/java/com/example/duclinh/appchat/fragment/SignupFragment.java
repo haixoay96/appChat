@@ -1,23 +1,33 @@
-package com.example.duclinh.appchat.activity;
+package com.example.duclinh.appchat.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.LinearLayoutCompat;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.duclinh.appchat.orther.MyApplication;
 import com.example.duclinh.appchat.R;
+import com.example.duclinh.appchat.orther.MyApplication;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SignupActivity extends AppCompatActivity {
+/**
+ * Created by haixo on 8/18/2016.
+ */
+public class SignupFragment extends DialogFragment {
+    private Context context;
     private EditText account;
     private EditText password;
     private EditText rePassword;
@@ -25,23 +35,38 @@ public class SignupActivity extends AppCompatActivity {
     private TextView alreadyAccount;
     private Socket socket;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_signup);
-        socket = MyApplication.getSocket();
-        controlView();
-        controlEvent();
-        String textAccount = getIntent().getStringExtra("account");
-        account.setText(textAccount);
+    public SignupFragment(){
+
     }
 
-    private void controlView() {
-        account = (EditText) findViewById(R.id.activity_signup_account);
-        password = (EditText) findViewById(R.id.activity_signup_password);
-        rePassword = (EditText) findViewById(R.id.activity_signup_repassword);
-        createAccount = (AppCompatButton) findViewById(R.id.activity_signup_createaccount);
-        alreadyAccount = (TextView) findViewById(R.id.activity_signup_alreadyaccount);
+    public static SignupFragment newInstance(String title){
+        SignupFragment signupFragment = new SignupFragment();
+        Bundle args = new Bundle();
+        args.putString("title", title);
+        signupFragment.setArguments(args);
+        return signupFragment;
+    }
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_signup, container);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        socket = MyApplication.getSocket();
+        controlView(view);
+        controlEvent();
     }
 
     private void controlEvent() {
@@ -49,7 +74,7 @@ public class SignupActivity extends AppCompatActivity {
         alreadyAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                dismiss();
             }
         });
         createAccount.setOnClickListener(new View.OnClickListener() {
@@ -59,11 +84,11 @@ public class SignupActivity extends AppCompatActivity {
                 final String textPassword = password.getText().toString();
                 String textRePassword = rePassword.getText().toString();
                 if(textPassword.equals("")||textPassword.equals("")||textRePassword.equals("")){
-                    Toast.makeText(SignupActivity.this, "Chưa nhập đủ thông tin", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Chưa nhập đủ thông tin", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if(!textPassword.equals(textRePassword)){
-                    Toast.makeText(SignupActivity.this, "Xác nhận mật khẩu không đúng", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Xác nhận mật khẩu không đúng", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 JSONObject jsonObject = new JSONObject();
@@ -81,7 +106,7 @@ public class SignupActivity extends AppCompatActivity {
                 socket.once("resultSignUp", new Emitter.Listener() {
                     @Override
                     public void call(final Object... args) {
-                        SignupActivity.this.runOnUiThread(new Runnable() {
+                        ((Activity)context).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 JSONObject data = (JSONObject) args[0];
@@ -93,11 +118,6 @@ public class SignupActivity extends AppCompatActivity {
                                 }
                                 if(errorCode == 100){
                                     // when sigup successfull
-                                    Intent intent = getIntent();
-                                    intent.putExtra("account", textAccoun);
-                                    intent.putExtra("password", textPassword);
-                                    SignupActivity.this.setResult(100,intent);
-                                    finish();
                                 }
                                 else if (errorCode == 101){
                                     /// when account already exist
@@ -107,8 +127,9 @@ public class SignupActivity extends AppCompatActivity {
                                 }
                                 else {
                                     // when app error
-                                    Toast.makeText(SignupActivity.this, "Application error! Please feedback!", Toast.LENGTH_SHORT).show();
                                 }
+                                Toast.makeText(context, args[0]+ "", Toast.LENGTH_SHORT).show();
+
                             }
                         });
                     }
@@ -117,5 +138,20 @@ public class SignupActivity extends AppCompatActivity {
 
             }
         });
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getDialog().getWindow().setLayout(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT);
+    }
+
+    private void controlView(View view) {
+        account = (EditText) view.findViewById(R.id.fragment_signup_account);
+        password = (EditText) view.findViewById(R.id.fragment_signup_password);
+        rePassword = (EditText) view.findViewById(R.id.fragment_signup_repassword);
+        createAccount = (AppCompatButton) view.findViewById(R.id.fragment_signup_createaccount);
+        alreadyAccount = (TextView) view.findViewById(R.id.fragment_signup_alreadyaccount);
     }
 }

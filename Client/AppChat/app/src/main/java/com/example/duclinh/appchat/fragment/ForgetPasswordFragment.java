@@ -4,20 +4,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.widget.ActionBarOverlayLayout;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.duclinh.appchat.R;
-import com.example.duclinh.appchat.activity.LoginActivity;
 import com.example.duclinh.appchat.orther.MyApplication;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
@@ -62,19 +58,30 @@ public class ForgetPasswordFragment extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         socket = MyApplication.getSocket();
+        controlView(view);
+        controlEvent();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getDialog().getWindow().setLayout(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT);
+
+    }
+    private void controlView(View view) {
         account = (EditText) view.findViewById(R.id.fragmnet_forget_password_account);
         resetpassword = (AppCompatButton) view.findViewById(R.id.fragmnet_forget_password_resetpassword);
+
+    }
+    private void controlEvent() {
         resetpassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 JSONObject object = new JSONObject();
                 try {
-                    object.put("account", "haixoay96@gmail.com");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    object.put("password", "123456789");
+                    object.put("account", account.getText().toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -90,15 +97,12 @@ public class ForgetPasswordFragment extends DialogFragment {
                         });
                     }
                 });
-                dismiss();
+               // dismiss();
             }
         });
     }
-    @Override
-    public void onResume() {
-        super.onResume();
 
-        getDialog().getWindow().setLayout(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT);
 
-    }
+
+
 }

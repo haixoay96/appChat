@@ -8,22 +8,25 @@
         <item name="android:textColorPrimary">@color/colorText</item>
         <item name="android:colorButtonNormal">@color/colorButton</item>
         <item name="android:textColor">@color/colorText</item>
-        <item name="android:editTextBackground">@color/edittextColor</item>
     </style>
-    <style name="Theme_activity_login_or_signup" parent="AppTheme">
+    <style name="Theme_activity_main" parent="AppTheme">
+        <item name="android:editTextColor">@color/edittextColor</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:background">@color/colorPrimary</item>
-        <item name="android:dialogTheme">@style/Theme_fragment_forget_password</item>
+        <item name="android:dialogTheme">@style/Theme_fragment_dialog</item>
+        <item name="android:colorControlNormal">@color/controlNormalColor</item>
     </style>
     <style name="Them_activity_users_online" parent="AppTheme">
         <item name="colorPrimaryDark">#9cbaadad</item>
         <item name="android:background">#ffffff</item>
     </style>
-    <style name="Theme_fragment_forget_password" parent="Theme.AppCompat.Light.Dialog" >
+    <style name="Theme_fragment_dialog" parent="Theme.AppCompat.Light.Dialog" >
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:colorButtonNormal">@color/colorButton</item>
-        <item name="android:editTextBackground">@color/edittextColor</item>
-
+        <item name="android:textColorHint">@color/colorTextHint</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:editTextColor">@color/edittextColor</item>
+        <item name="android:colorControlNormal">@color/controlNormalColor</item>
     </style>
 
 </resources>

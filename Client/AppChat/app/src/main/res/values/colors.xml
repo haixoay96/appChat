@@ -11,5 +11,7 @@
     <color name="colorTextHint">#BDBDBD</color>
     <color name="colorText">#FFFFFF</color>
     <color name="colorButton">#D32F2F</color>
-    <color name="edittextColor">#00ffffff</color>
+    <color name="edittextColor">#FFFFFF</color>
+    <color name="controlNormalColor">#BDBDBD</color>
+    <color name="editextBackgroundColor">#00ffffff</color>
 </resources>

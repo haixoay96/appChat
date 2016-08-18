@@ -3,7 +3,6 @@ package com.example.duclinh.appchat.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,25 +11,26 @@ import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.OvershootInterpolator;
 import android.widget.Toast;
 
 import com.example.duclinh.appchat.R;
 import com.example.duclinh.appchat.adapter.AdapterUsersOnline;
-import com.example.duclinh.appchat.data.ItemUsersOnline;
 import com.example.duclinh.appchat.orther.DividerItemDecoration;
+import com.example.duclinh.appchat.orther.MyApplication;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.Socket;
 
-import java.util.ArrayList;
-
-import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
-import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class UsersOnlineActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private RecyclerView listUsers;
     private AdapterUsersOnline adapterUsersOnline;
-    private ArrayList<ItemUsersOnline> listUsersOnline;
+    private JSONArray listUsersOnline;
     private SwipeRefreshLayout swipeRefresh;
+    private Socket socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +42,13 @@ public class UsersOnlineActivity extends AppCompatActivity {
     }
 
     private void handleLogic() {
+        socket = MyApplication.getSocket();
+        try {
+            listUsersOnline = new JSONArray(getIntent().getStringExtra("listUsersOnline"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         setSupportActionBar(toolbar);
-        listUsersOnline = new ArrayList<ItemUsersOnline>();
-        prepareData();
         adapterUsersOnline = new AdapterUsersOnline(listUsersOnline);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         listUsers.setLayoutManager(layoutManager);
@@ -52,6 +56,57 @@ public class UsersOnlineActivity extends AppCompatActivity {
         listUsers.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         listUsers.setAdapter(adapterUsersOnline);
         adapterUsersOnline.notifyDataSetChanged();
+        socket.on("addUser", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                listUsersOnline.put(args[0]);
+                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(UsersOnlineActivity.this, args[0].toString(), Toast.LENGTH_SHORT).show();
+                        adapterUsersOnline.notifyDataSetChanged();
+                    }
+                });
+
+            }
+        });
+        socket.on("removeUser", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject object = (JSONObject) args[0];
+                int index = -1;
+                for(int i = 0 ; i<listUsersOnline.length(); i++ ){
+                    try {
+                        JSONObject jsonObject = (JSONObject) listUsersOnline.get(i);
+                        if(object.getString("socket").equals(jsonObject.getString("socket"))){
+                            index = i;
+                            break;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                listUsersOnline.remove(index);
+                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapterUsersOnline.notifyDataSetChanged();
+                    }
+                });
+            }
+        });
+        socket.on("receiveMessage", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(UsersOnlineActivity.this,args[0].toString(), Toast.LENGTH_SHORT ).show();
+                    }
+                });
+            }
+        });
+
 
     }
 
@@ -72,6 +127,14 @@ public class UsersOnlineActivity extends AppCompatActivity {
             @Override
             public void onClick(View view, int position) {
                 Toast.makeText(UsersOnlineActivity.this, position +"", Toast.LENGTH_SHORT).show();
+                try {
+                    JSONObject object = new JSONObject();
+                    object.put("account", ((JSONObject)listUsersOnline.get(position)).getString("account"));
+                    object.put("message", "Hello");
+                    socket.emit("sendMessage",object);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -89,24 +152,6 @@ public class UsersOnlineActivity extends AppCompatActivity {
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.activity_users_online_swiperefresh);
         toolbar = (Toolbar) findViewById(R.id.activity_users_online_toolbar);
     }
-    private void prepareData(){
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a1, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a2, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a3, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a4, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a5, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a6, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a7, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a8, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a9, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a10, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a11, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a12, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a13, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a14, "Đức Linh", "Vui quá các bạn ơi!"));
-        listUsersOnline.add(new ItemUsersOnline(R.drawable.a15, "Đức Linh", "Vui quá các bạn ơi!"));
-    }
-
 
     public interface ClickListener {
         void onClick(View view, int position);

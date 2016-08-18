@@ -15,22 +15,17 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true">
-        <activity android:name=".activity.MainActivity" />
-        <activity android:name=".activity.LoginActivity"
-            android:theme="@style/Theme_activity_login_or_signup"
-            >
+        <activity
+            android:name=".activity.MainActivity"
+            android:theme="@style/Theme_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.SignupActivity"
-            android:theme="@style/Theme_activity_login_or_signup">
-        </activity>
-        <activity android:name=".activity.UsersOnlineActivity"
+        <activity
+            android:name=".activity.UsersOnlineActivity"
             android:theme="@style/Them_activity_users_online">
-
         </activity>
     </application>
 

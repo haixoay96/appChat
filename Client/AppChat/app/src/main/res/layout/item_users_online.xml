@@ -2,8 +2,6 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/tools"
-    app:cardCornerRadius="15dp"
-    android:layout_marginBottom="2dp"
     app:cardElevation="5dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -36,11 +34,12 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/item_users_online_nickname"
-                android:layout_width="wrap_content"
+                android:maxLines="1"
+                android:id="@+id/item_users_online_account"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:text="Đức Linh"
+                android:text="Duc Linh"
                 android:textColor="#695a5a"
                 android:textSize="20sp"
                 android:textStyle="bold" />
