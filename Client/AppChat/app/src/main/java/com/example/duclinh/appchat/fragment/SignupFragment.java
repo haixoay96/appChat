@@ -33,7 +33,6 @@ public class SignupFragment extends DialogFragment {
     private EditText rePassword;
     private AppCompatButton createAccount;
     private TextView alreadyAccount;
-    private Socket socket;
 
     public SignupFragment(){
 
@@ -64,7 +63,6 @@ public class SignupFragment extends DialogFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        socket = MyApplication.getSocket();
         controlView(view);
         controlEvent();
     }
@@ -80,6 +78,9 @@ public class SignupFragment extends DialogFragment {
         createAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!MyApplication.socket.connected()){
+                    MyApplication.socket.connect();
+                }
                 final String textAccoun = account.getText().toString();
                 final String textPassword = password.getText().toString();
                 String textRePassword = rePassword.getText().toString();
@@ -102,8 +103,8 @@ public class SignupFragment extends DialogFragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                socket.emit("signUp", jsonObject);
-                socket.once("resultSignUp", new Emitter.Listener() {
+                MyApplication.socket.emit("signUp", jsonObject);
+                MyApplication.socket.once("resultSignUp", new Emitter.Listener() {
                     @Override
                     public void call(final Object... args) {
                         ((Activity)context).runOnUiThread(new Runnable() {

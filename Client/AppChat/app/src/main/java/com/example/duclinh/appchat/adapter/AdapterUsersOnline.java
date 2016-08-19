@@ -9,6 +9,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.example.duclinh.appchat.R;
+import com.example.duclinh.appchat.orther.MyApplication;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -76,9 +77,10 @@ public class AdapterUsersOnline extends RecyclerView.Adapter<AdapterUsersOnline.
     public void onBindViewHolder(MyViewHolder holder, int position) {
         try {
             JSONObject object = listUsersOnlines.getJSONObject(position);
-            Picasso.with(parent.getContext()).load("http://192.168.0.140:3000"+object.getString("avatar")).resize(500,500).into(holder.getAvatar());
+            Picasso.with(parent.getContext()).load(MyApplication.HOST+object.getString("avatar")).resize(500,500).into(holder.getAvatar());
             holder.getAccount().setText(object.getString("account"));
             holder.getStatus().setText("Cuoi len");
+
 
         } catch (JSONException e) {
             e.printStackTrace();

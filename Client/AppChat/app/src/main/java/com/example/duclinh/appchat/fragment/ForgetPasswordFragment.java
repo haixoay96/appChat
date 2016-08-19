@@ -27,7 +27,6 @@ import org.json.JSONObject;
 public class ForgetPasswordFragment extends DialogFragment {
     private EditText account;
     private AppCompatButton resetpassword;
-    private Socket socket;
     private Context context;
 
     public ForgetPasswordFragment(){
@@ -57,7 +56,6 @@ public class ForgetPasswordFragment extends DialogFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        socket = MyApplication.getSocket();
         controlView(view);
         controlEvent();
 
@@ -79,14 +77,17 @@ public class ForgetPasswordFragment extends DialogFragment {
         resetpassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!MyApplication.socket.connected()){
+                    MyApplication.socket.connect();
+                }
                 JSONObject object = new JSONObject();
                 try {
                     object.put("account", account.getText().toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                socket.emit("forgetPassword",object );
-                socket.once("resultForgetPassword", new Emitter.Listener() {
+                MyApplication.socket.emit("forgetPassword",object );
+                MyApplication.socket.once("resultForgetPassword", new Emitter.Listener() {
                     @Override
                     public void call(final Object... args) {
                         ((Activity)context).runOnUiThread(new Runnable() {

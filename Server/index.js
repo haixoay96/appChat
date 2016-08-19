@@ -46,17 +46,18 @@ const ERROR_ALREADY = 101;
 const ERROR_MAIL = 102;
 const ERROR_INVAILD = 103;
 const ERROR_NOT_FOUND = 104;
-const ERROR_TRY_AGAIN = 105
+const ERROR_TRY_AGAIN = 105;
+const ERROR_ALREADY_LOGIN = 106;
 
 var listUsersOnline = [];
-
+var socketIO;
 // when there is person connect
 io.on('connection', function (socket) {
-
+	console.log(socketIO===socket);
+	socketIO = socket;
 	// when there is person sign up
 	socket.on('signUp', function (data) {
 		console.log(data);
-
 		// check exitst mail
 		emailCheck(data.account)
 		.then(function (res) {
@@ -105,22 +106,32 @@ io.on('connection', function (socket) {
 
 	// when there is login
 	socket.on('login', function (data) {
-		console.log(data);
 		fs.readFile(__dirname +'/public/data/users.json','utf8', function(err,users) {
-			console.log(users);
 			var objectUsers = JSON.parse(users);
-			if(find.findIndex(objectUsers.list, {account:data.account, password:data.password})!==-1){
-				console.log('Thanh cong');
+			var indexRemove = find.findIndex(listUsersOnline, {
+				account:data.account
+			});
+			if(indexRemove!==-1){
+				console.log(listUsersOnline);
+				socket.broadcast.emit('removeUser', listUsersOnline[indexRemove]);
+				listUsersOnline.splice(indexRemove,1);
+				console.log("da remove");
+			}
+			var indexUsers = find.findIndex(objectUsers.list, data);
+			if(indexUsers!==-1 ){
+				socket.join(data.account);
 				socket.emit('resultLogin', {
 					status:ERROR_SUCCESS,
 					listUsersOnline: listUsersOnline
 				});
 				listUsersOnline.push({
 					account:data.account,
-					socket: socket.id,
-					avatar: '/data/avatar/defaultavatar.jpg'
+					socket:socket.id,
+					avatar:objectUsers.list[indexUsers].avatar
 				});
-				socket.broadcast.emit('addUser', listUsersOnline[listUsersOnline.length-1]);
+				socket.broadcast.emit('addUser', listUsersOnline[listUsersOnline.length-1]);	
+
+		
 			}
 			else{
 				console.log('that bai');
@@ -130,6 +141,18 @@ io.on('connection', function (socket) {
 			}
 			});
 	});
+	socket.on("logout", function () {
+		var index = find.findIndex(listUsersOnline, {
+			socket:socket.id
+		});
+		if(index!==-1){
+			socket.broadcast.emit('removeUser', listUsersOnline[index]);
+			listUsersOnline.splice(index,1);
+			console.log("logout");
+		}
+		console.log(listUsersOnline);
+
+	});	
 
 	socket.on('forgetPassword', function (data) {
 		console.log('reset');
@@ -164,20 +187,20 @@ io.on('connection', function (socket) {
 
 
 	socket.on('sendMessage', function (data) {
-			// data = {account:name , message:mess}
-			var indexReceiver = find.findIndex(listUsersOnline, {account:data.account});
-			var to = listUsersOnline[indexReceiver];
-			socket.broadcast.to(to.socket).emit('receiveMessage', data);
-
+		// data = {account:name , message:mess}
+		socket.broadcast.to(data.account).emit('receiveMessage', data);		
 	});
 	socket.on('disconnect', function () {
-		console.log('socket id '+ socket.id +' disconnected !');
-		var index = find.findIndex(listUsersOnline, {socket:socket.id});
-		if(index !==-1){
-			socket.broadcast.emit('removeUser', listUsersOnline[index]);
-			listUsersOnline.splice(index,1);
-		}
-
+			var index = find.findIndex(listUsersOnline, {
+				socket:socket.id
+			});
+			if(index!==-1){
+				socket.broadcast.emit('removeUser', listUsersOnline[index]);
+				listUsersOnline.splice(index,1);
+				console.log('disconnect');
+				console.log(listUsersOnline);
+			}
+			
 	});
 
 	console.log('co nguoi connect' + socket.id);

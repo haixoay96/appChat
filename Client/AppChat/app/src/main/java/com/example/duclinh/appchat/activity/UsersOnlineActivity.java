@@ -1,20 +1,25 @@
 package com.example.duclinh.appchat.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.duclinh.appchat.R;
+import com.example.duclinh.appchat.adapter.AdapterListMessageChat;
 import com.example.duclinh.appchat.adapter.AdapterUsersOnline;
+import com.example.duclinh.appchat.fragment.ScreenChatFragment;
 import com.example.duclinh.appchat.orther.DividerItemDecoration;
 import com.example.duclinh.appchat.orther.MyApplication;
 import com.github.nkzawa.emitter.Emitter;
@@ -30,7 +35,6 @@ public class UsersOnlineActivity extends AppCompatActivity {
     private AdapterUsersOnline adapterUsersOnline;
     private JSONArray listUsersOnline;
     private SwipeRefreshLayout swipeRefresh;
-    private Socket socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +45,14 @@ public class UsersOnlineActivity extends AppCompatActivity {
         controlEvent();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        MyApplication.socket.disconnect();
+        finish();
+    }
+
     private void handleLogic() {
-        socket = MyApplication.getSocket();
         try {
             listUsersOnline = new JSONArray(getIntent().getStringExtra("listUsersOnline"));
         } catch (JSONException e) {
@@ -56,7 +66,8 @@ public class UsersOnlineActivity extends AppCompatActivity {
         listUsers.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         listUsers.setAdapter(adapterUsersOnline);
         adapterUsersOnline.notifyDataSetChanged();
-        socket.on("addUser", new Emitter.Listener() {
+        MyApplication.socket.off("addUser");
+        MyApplication.socket.on("addUser", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
                 listUsersOnline.put(args[0]);
@@ -70,7 +81,8 @@ public class UsersOnlineActivity extends AppCompatActivity {
 
             }
         });
-        socket.on("removeUser", new Emitter.Listener() {
+        MyApplication.socket.off("removeUser");
+        MyApplication.socket.on("removeUser", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 JSONObject object = (JSONObject) args[0];
@@ -78,7 +90,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
                 for(int i = 0 ; i<listUsersOnline.length(); i++ ){
                     try {
                         JSONObject jsonObject = (JSONObject) listUsersOnline.get(i);
-                        if(object.getString("socket").equals(jsonObject.getString("socket"))){
+                        if(object.getString("account").equals(jsonObject.getString("account"))){
                             index = i;
                             break;
                         }
@@ -95,18 +107,20 @@ public class UsersOnlineActivity extends AppCompatActivity {
                 });
             }
         });
-        socket.on("receiveMessage", new Emitter.Listener() {
+        MyApplication.socket.off("receiveMessage");
+        MyApplication.socket.on("receiveMessage", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
-                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(UsersOnlineActivity.this,args[0].toString(), Toast.LENGTH_SHORT ).show();
-                    }
-                });
+               UsersOnlineActivity.this.runOnUiThread(new Runnable() {
+                   @Override
+                   public void run() {
+                       FragmentManager fragmentManager = getSupportFragmentManager();
+                       ScreenChatFragment screenChatFragment = ScreenChatFragment.newInstance("Tin nhắn");
+                       screenChatFragment.show(fragmentManager, "Tin nhắn");
+                   }
+               });
             }
         });
-
 
     }
 
@@ -131,7 +145,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
                     JSONObject object = new JSONObject();
                     object.put("account", ((JSONObject)listUsersOnline.get(position)).getString("account"));
                     object.put("message", "Hello");
-                    socket.emit("sendMessage",object);
+                    MyApplication.socket.emit("sendMessage",object);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
