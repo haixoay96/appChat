@@ -114,9 +114,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
                    @Override
                    public void run() {
-                       FragmentManager fragmentManager = getSupportFragmentManager();
-                       ScreenChatFragment screenChatFragment = ScreenChatFragment.newInstance("Tin nhắn");
-                       screenChatFragment.show(fragmentManager, "Tin nhắn");
+                      Toast.makeText(getApplicationContext(), args[0].toString(), Toast.LENGTH_SHORT).show();
                    }
                });
             }
@@ -142,10 +140,10 @@ public class UsersOnlineActivity extends AppCompatActivity {
             public void onClick(View view, int position) {
                 Toast.makeText(UsersOnlineActivity.this, position +"", Toast.LENGTH_SHORT).show();
                 try {
-                    JSONObject object = new JSONObject();
-                    object.put("account", ((JSONObject)listUsersOnline.get(position)).getString("account"));
-                    object.put("message", "Hello");
-                    MyApplication.socket.emit("sendMessage",object);
+                    String account = ((JSONObject)listUsersOnline.get(position)).getString("account");
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    ScreenChatFragment screenChatFragment = ScreenChatFragment.newInstance(account);
+                    screenChatFragment.show(fragmentManager, account);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

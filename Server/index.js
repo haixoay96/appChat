@@ -130,25 +130,26 @@ io.on('connection', function (socket) {
 					avatar:objectUsers.list[indexUsers].avatar
 				});
 				socket.broadcast.emit('addUser', listUsersOnline[listUsersOnline.length-1]);	
+				console.log(data.account + ' '+ socket.id + ' login');
 
 		
 			}
 			else{
-				console.log('that bai');
+				console.log(data.account + ' '+ socket.id+ ' that bai');
 				socket.emit('resultLogin', {
 					status:ERROR_INVAILD
 				});
 			}
 			});
 	});
-	socket.on("logout", function () {
+	socket.on('logout', function () {
 		var index = find.findIndex(listUsersOnline, {
 			socket:socket.id
 		});
 		if(index!==-1){
 			socket.broadcast.emit('removeUser', listUsersOnline[index]);
 			listUsersOnline.splice(index,1);
-			console.log("logout");
+			console.log(data.account + ' '+ socket.id + ' logout');
 		}
 		console.log(listUsersOnline);
 
@@ -188,7 +189,8 @@ io.on('connection', function (socket) {
 
 	socket.on('sendMessage', function (data) {
 		// data = {account:name , message:mess}
-		socket.broadcast.to(data.account).emit('receiveMessage', data);		
+		socket.broadcast.to(data.account).emit('receiveMessage', data);
+		socket.emit('resultSendMessage', data);
 	});
 	socket.on('disconnect', function () {
 			var index = find.findIndex(listUsersOnline, {
