@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.duclinh.appchat.R;
 import com.example.duclinh.appchat.adapter.AdapterListMessageChat;
 import com.example.duclinh.appchat.adapter.AdapterUsersOnline;
+import com.example.duclinh.appchat.designnotifi.CenterManagerMessage;
 import com.example.duclinh.appchat.fragment.ScreenChatFragment;
 import com.example.duclinh.appchat.orther.DividerItemDecoration;
 import com.example.duclinh.appchat.orther.MyApplication;
@@ -30,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UsersOnlineActivity extends AppCompatActivity {
+    private CenterManagerMessage centerManagerMessage;
     private Toolbar toolbar;
     private RecyclerView listUsers;
     private AdapterUsersOnline adapterUsersOnline;
@@ -53,6 +55,8 @@ public class UsersOnlineActivity extends AppCompatActivity {
     }
 
     private void handleLogic() {
+        // init center notifi message
+        centerManagerMessage = new CenterManagerMessage();
         try {
             listUsersOnline = new JSONArray(getIntent().getStringExtra("listUsersOnline"));
         } catch (JSONException e) {
@@ -114,7 +118,16 @@ public class UsersOnlineActivity extends AppCompatActivity {
                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
                    @Override
                    public void run() {
-                      Toast.makeText(getApplicationContext(), args[0].toString(), Toast.LENGTH_SHORT).show();
+                       JSONObject object = (JSONObject) args[0];
+                       String account = null;
+                       String message = null;
+                       try {
+                           account =object.getString("account");
+                           message= object.getString("message");
+                       } catch (JSONException e) {
+                           e.printStackTrace();
+                       }
+                       centerManagerMessage.notifiAllClient(account, message);
                    }
                });
             }
@@ -142,7 +155,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
                 try {
                     String account = ((JSONObject)listUsersOnline.get(position)).getString("account");
                     FragmentManager fragmentManager = getSupportFragmentManager();
-                    ScreenChatFragment screenChatFragment = ScreenChatFragment.newInstance(account);
+                    ScreenChatFragment screenChatFragment = ScreenChatFragment.newInstance(account,centerManagerMessage);
                     screenChatFragment.show(fragmentManager, account);
                 } catch (JSONException e) {
                     e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.example.duclinh.appchat.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,7 +18,10 @@ import android.widget.Toast;
 import com.example.duclinh.appchat.R;
 import com.example.duclinh.appchat.adapter.AdapterListMessageChat;
 import com.example.duclinh.appchat.data.FormMessage;
+import com.example.duclinh.appchat.designnotifi.CenterManagerMessage;
+import com.example.duclinh.appchat.designnotifi.Client;
 import com.example.duclinh.appchat.orther.MyApplication;
+import com.github.nkzawa.emitter.Emitter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,7 +31,7 @@ import java.util.ArrayList;
 /**
  * Created by haixo on 8/19/2016.
  */
-public class ScreenChatFragment extends DialogFragment {
+public class ScreenChatFragment extends DialogFragment implements Client {
     private Context context;
     private RecyclerView listMessage;
     private EditText message;
@@ -36,14 +40,18 @@ public class ScreenChatFragment extends DialogFragment {
     private AdapterListMessageChat adapterListMessageChat;
     private RecyclerView.LayoutManager layoutManager;
     private String account;
+    private CenterManagerMessage centerManagerMessage;
 
 
 
     public ScreenChatFragment(){
 
     }
-    public static ScreenChatFragment newInstance(String account){
-        ScreenChatFragment screenChatFragment = new ScreenChatFragment();
+    public ScreenChatFragment(CenterManagerMessage centerManagerMessage){
+        this.centerManagerMessage = centerManagerMessage;
+    }
+    public static ScreenChatFragment newInstance(String account, CenterManagerMessage centerManagerMessage){
+        ScreenChatFragment screenChatFragment = new ScreenChatFragment(centerManagerMessage);
         Bundle args = new Bundle();
         args.putString("account", account);
         screenChatFragment.setArguments(args);
@@ -54,6 +62,7 @@ public class ScreenChatFragment extends DialogFragment {
         super.onAttach(context);
         this.context = context;
     }
+
 
     @Nullable
     @Override
@@ -75,6 +84,14 @@ public class ScreenChatFragment extends DialogFragment {
         super.onResume();
         getDialog().getWindow().setLayout(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.MATCH_PARENT);
     }
+    @Override
+    public void update(String account, String message) {
+        if(this.account.equals(account)){
+            listData.add(0,new FormMessage(MyApplication.HOST+"/data/avatar/defaultavatar.jpg",message,2));
+            adapterListMessageChat.notifyDataSetChanged();
+        }
+
+    }
 
     private void controlLogic() {
         account =getArguments().getString("account");
@@ -87,6 +104,7 @@ public class ScreenChatFragment extends DialogFragment {
         listMessage.setLayoutManager(layoutManager);
         listMessage.setAdapter(adapterListMessageChat);
         adapterListMessageChat.notifyDataSetChanged();
+        centerManagerMessage.addClient(this);
     }
 
 
@@ -100,7 +118,7 @@ public class ScreenChatFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 JSONObject object = new JSONObject();
-                String data = message.getText().toString();
+                final String data = message.getText().toString();
                 message.setText("");
                 try {
                     object.put("account", account);
@@ -109,10 +127,24 @@ public class ScreenChatFragment extends DialogFragment {
                     e.printStackTrace();
                 }
                 MyApplication.socket.emit("sendMessage",object);
-                listData.add(0,new FormMessage(MyApplication.HOST+"/data/avatar/defaultavatar.jpg",data));
-                adapterListMessageChat.notifyDataSetChanged();
+                MyApplication.socket.off("resultSendMessage");// only send a one at a time
+                MyApplication.socket.once("resultSendMessage", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        listData.add(0,new FormMessage(MyApplication.HOST+"/data/avatar/defaultavatar.jpg",data,1));
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapterListMessageChat.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                });
+
             }
         });
 
     }
+
+
 }

@@ -6,10 +6,12 @@ package com.example.duclinh.appchat.data;
 public class FormMessage {
     private String avatar;
     private String message;
+    private int sender;
 
-    public FormMessage(String avatar, String message) {
+    public FormMessage(String avatar, String message , int sender) {
         this.message = message;
         this.avatar = avatar;
+        this.sender = sender;
     }
 
     public String getAvatar() {
@@ -26,5 +28,13 @@ public class FormMessage {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public int getSender() {
+        return sender;
+    }
+
+    public void setSender(int sender) {
+        this.sender = sender;
     }
 }

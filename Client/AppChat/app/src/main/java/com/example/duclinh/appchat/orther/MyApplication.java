@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
  * Created by duclinh on 07/08/2016.
  */
 public class MyApplication extends Application {
-    public static final String HOST = "http://192.168.0.104:3000";
+    public static final String HOST = "http://192.168.1.27:3000";
     public static Socket socket = null;
 
     @Override

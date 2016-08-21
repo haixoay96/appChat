@@ -50,11 +50,8 @@ const ERROR_TRY_AGAIN = 105;
 const ERROR_ALREADY_LOGIN = 106;
 
 var listUsersOnline = [];
-var socketIO;
 // when there is person connect
 io.on('connection', function (socket) {
-	console.log(socketIO===socket);
-	socketIO = socket;
 	// when there is person sign up
 	socket.on('signUp', function (data) {
 		console.log(data);
@@ -189,8 +186,16 @@ io.on('connection', function (socket) {
 
 	socket.on('sendMessage', function (data) {
 		// data = {account:name , message:mess}
-		socket.broadcast.to(data.account).emit('receiveMessage', data);
-		socket.emit('resultSendMessage', data);
+		var indexSender = find.findIndex(listUsersOnline, {
+			socket:socket.id
+		});
+		if(indexSender!==-1){
+			var receiver = data.account;
+			data.account = listUsersOnline[indexSender].account;
+			socket.broadcast.to(receiver).emit('receiveMessage', data);
+			socket.emit('resultSendMessage', data);
+		}
+		
 	});
 	socket.on('disconnect', function () {
 			var index = find.findIndex(listUsersOnline, {
