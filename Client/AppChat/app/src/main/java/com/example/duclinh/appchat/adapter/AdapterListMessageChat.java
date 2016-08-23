@@ -34,13 +34,11 @@ public class AdapterListMessageChat extends RecyclerView.Adapter<AdapterListMess
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private CircleImageView avatar;
         private TextView message;
-        private RelativeLayout relativeLayout;
         private CardView cardView;
         public MyViewHolder(View view) {
             super(view);
             avatar = (CircleImageView) view.findViewById(R.id.item_message_chat_avatar);
             message = (TextView) view.findViewById(R.id.item_message_chat_message);
-            relativeLayout = (RelativeLayout) view.findViewById(R.id.item_message_chat_relative);
             cardView = (CardView) view.findViewById(R.id.item_message_chat_cardview);
         }
 
@@ -68,15 +66,6 @@ public class AdapterListMessageChat extends RecyclerView.Adapter<AdapterListMess
             this.message = message;
         }
 
-        public RelativeLayout getRelativeLayout() {
-            return relativeLayout;
-        }
-
-        public void setRelativeLayout(RelativeLayout relativeLayout) {
-            this.relativeLayout = relativeLayout;
-        }
-
-
     }
 
     @Override
@@ -91,7 +80,6 @@ public class AdapterListMessageChat extends RecyclerView.Adapter<AdapterListMess
         FormMessage formMessage = listData.get(position);
         CircleImageView avatar = holder.getAvatar();
         TextView message = holder.getMessage();
-        RelativeLayout relativeLayout = holder.getRelativeLayout();
         CardView cardView = holder.getCardView();
         Picasso.with(parent.getContext()).load(formMessage.getAvatar()).resize(500,500).into(avatar);
         message.setText(formMessage.getMessage());

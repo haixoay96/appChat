@@ -1,17 +1,26 @@
 package com.example.duclinh.appchat.activity;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -37,7 +46,9 @@ public class UsersOnlineActivity extends AppCompatActivity {
     private AdapterUsersOnline adapterUsersOnline;
     private JSONArray listUsersOnline;
     private SwipeRefreshLayout swipeRefresh;
-
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +68,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
     private void handleLogic() {
         // init center notifi message
         centerManagerMessage = new CenterManagerMessage();
+        // get data users online
         try {
             listUsersOnline = new JSONArray(getIntent().getStringExtra("listUsersOnline"));
         } catch (JSONException e) {
@@ -70,6 +82,11 @@ public class UsersOnlineActivity extends AppCompatActivity {
         listUsers.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         listUsers.setAdapter(adapterUsersOnline);
         adapterUsersOnline.notifyDataSetChanged();
+
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.open, R.string.close);
+        actionBarDrawerToggle.syncState();
+
+
         MyApplication.socket.off("addUser");
         MyApplication.socket.on("addUser", new Emitter.Listener() {
             @Override
@@ -85,6 +102,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
 
             }
         });
+
         MyApplication.socket.off("removeUser");
         MyApplication.socket.on("removeUser", new Emitter.Listener() {
             @Override
@@ -111,6 +129,7 @@ public class UsersOnlineActivity extends AppCompatActivity {
                 });
             }
         });
+
         MyApplication.socket.off("receiveMessage");
         MyApplication.socket.on("receiveMessage", new Emitter.Listener() {
             @Override
@@ -118,6 +137,12 @@ public class UsersOnlineActivity extends AppCompatActivity {
                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
                    @Override
                    public void run() {
+                       NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(UsersOnlineActivity.this)
+                               .setSmallIcon(R.drawable.small)
+                               .setContentTitle("message")
+                               .setContentText("Thong bao");
+                       NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                       notificationManager.notify(3, builder.build());
                        JSONObject object = (JSONObject) args[0];
                        String account = null;
                        String message = null;
@@ -130,6 +155,14 @@ public class UsersOnlineActivity extends AppCompatActivity {
                        centerManagerMessage.notifiAllClient(account, message);
                    }
                });
+            }
+        });
+
+        MyApplication.socket.off("connect");
+        MyApplication.socket.on("connect", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                // re login when disconnect
             }
         });
 
@@ -168,6 +201,13 @@ public class UsersOnlineActivity extends AppCompatActivity {
             }
         }));
 
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                return false;
+            }
+        });
+
 
     }
 
@@ -176,6 +216,8 @@ public class UsersOnlineActivity extends AppCompatActivity {
         listUsers = (RecyclerView) findViewById(R.id.activity_users_online_listusers);
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.activity_users_online_swiperefresh);
         toolbar = (Toolbar) findViewById(R.id.activity_users_online_toolbar);
+        drawerLayout = (DrawerLayout) findViewById(R.id.activity_users_online_drawerlayout);
+        navigationView = (NavigationView) findViewById(R.id.activity_users_online_navigation);
     }
 
     public interface ClickListener {
