@@ -1,7 +1,7 @@
 package com.example.duclinh.appchat.fragment;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -13,13 +13,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.duclinh.appchat.R;
 import com.example.duclinh.appchat.adapter.AdapterListMessageChat;
 import com.example.duclinh.appchat.data.FormMessage;
-import com.example.duclinh.appchat.designnotifi.CenterManagerMessage;
-import com.example.duclinh.appchat.designnotifi.Client;
+import com.example.duclinh.appchat.designnotifi.receivermessage.CenterManager;
+import com.example.duclinh.appchat.designnotifi.receivermessage.Client;
 import com.example.duclinh.appchat.orther.MyApplication;
 import com.github.nkzawa.emitter.Emitter;
 
@@ -31,31 +32,38 @@ import java.util.ArrayList;
 /**
  * Created by haixo on 8/19/2016.
  */
-public class ScreenChatFragment extends DialogFragment implements Client {
+public class ScreenChatFragment extends DialogFragment implements Client{
     private Context context;
     private RecyclerView listMessage;
     private EditText message;
+    private CenterManager centerManagerMessage;
     private AppCompatButton send;
+    private TextView accountTitle;
     private ArrayList<FormMessage> listData;
     private AdapterListMessageChat adapterListMessageChat;
     private RecyclerView.LayoutManager layoutManager;
     private String account;
-    private CenterManagerMessage centerManagerMessage;
 
 
 
     public ScreenChatFragment(){
 
     }
-    public ScreenChatFragment(CenterManagerMessage centerManagerMessage){
+    public ScreenChatFragment(CenterManager centerManagerMessage , ArrayList<FormMessage> listData){
         this.centerManagerMessage = centerManagerMessage;
+        this.listData = listData;
     }
-    public static ScreenChatFragment newInstance(String account, CenterManagerMessage centerManagerMessage){
-        ScreenChatFragment screenChatFragment = new ScreenChatFragment(centerManagerMessage);
+    public static ScreenChatFragment newInstance(String account, CenterManager centerManagerMessage, ArrayList<FormMessage> listData){
+        ScreenChatFragment screenChatFragment = new ScreenChatFragment(centerManagerMessage, listData);
         Bundle args = new Bundle();
         args.putString("account", account);
         screenChatFragment.setArguments(args);
         return screenChatFragment;
+    }
+    @Override
+    public void update(String account, String message, int sender) {
+        adapterListMessageChat.notifyDataSetChanged();
+        listMessage.scrollToPosition(listData.size()-1);
     }
     @Override
     public void onAttach(Context context) {
@@ -84,34 +92,32 @@ public class ScreenChatFragment extends DialogFragment implements Client {
         super.onResume();
         getDialog().getWindow().setLayout(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.MATCH_PARENT);
     }
-    @Override
-    public void update(String account, String message) {
-        if(this.account.equals(account)){
-            listData.add(0,new FormMessage(MyApplication.HOST+"/data/avatar/defaultavatar.jpg",message,2));
-            adapterListMessageChat.notifyDataSetChanged();
-        }
 
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        centerManagerMessage.removeClient(this);
+        Toast.makeText(context, "remove", Toast.LENGTH_SHORT).show();
     }
 
     private void controlLogic() {
         account =getArguments().getString("account");
         getDialog().setTitle(account);
-        listData = new ArrayList<FormMessage>();
+        accountTitle.setText(account);
         adapterListMessageChat = new AdapterListMessageChat(listData);
         layoutManager = new LinearLayoutManager(context);
-        ((LinearLayoutManager)layoutManager).setReverseLayout(true);
-        ((LinearLayoutManager)layoutManager).setStackFromEnd(true);
+        //((LinearLayoutManager)layoutManager).setReverseLayout(true);
         listMessage.setLayoutManager(layoutManager);
         listMessage.setAdapter(adapterListMessageChat);
         adapterListMessageChat.notifyDataSetChanged();
+        listMessage.scrollToPosition(listData.size() -1 );
         centerManagerMessage.addClient(this);
     }
-
-
     private void controlView(View view) {
         listMessage = (RecyclerView) view.findViewById(R.id.fragment_screen_chat_listmessage);
         message = (EditText) view.findViewById(R.id.fragment_screen_chat_message);
         send = (AppCompatButton) view.findViewById(R.id.fragment_screen_chat_send);
+        accountTitle = (TextView) view.findViewById(R.id.fragment_screen_chat_accounttitle);
     }
     private void controlEvent() {
         send.setOnClickListener(new View.OnClickListener() {
@@ -127,24 +133,9 @@ public class ScreenChatFragment extends DialogFragment implements Client {
                     e.printStackTrace();
                 }
                 MyApplication.socket.emit("sendMessage",object);
-                MyApplication.socket.off("resultSendMessage");// only send a one at a time
-                MyApplication.socket.once("resultSendMessage", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        listData.add(0,new FormMessage(MyApplication.HOST+"/data/avatar/defaultavatar.jpg",data,1));
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                adapterListMessageChat.notifyDataSetChanged();
-                            }
-                        });
-                    }
-                });
-
             }
         });
 
     }
-
 
 }

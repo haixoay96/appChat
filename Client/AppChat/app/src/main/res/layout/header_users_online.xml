@@ -4,9 +4,4 @@
     android:layout_height="190dp"
     android:background="@color/colorTextHint"
     android:orientation="vertical">
-    <TextView
-        android:text="sdfasfas"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
 </LinearLayout>

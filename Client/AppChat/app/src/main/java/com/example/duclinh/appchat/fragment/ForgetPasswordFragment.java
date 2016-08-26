@@ -93,7 +93,26 @@ public class ForgetPasswordFragment extends DialogFragment {
                         ((Activity)context).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(context, args[0]+"", Toast.LENGTH_SHORT).show();
+                                JSONObject data = (JSONObject) args[0];
+                                int errorCode = 0;
+                                try {
+                                    errorCode = data.getInt("status");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                if(errorCode == 104){
+                                    Toast.makeText(context, "Không tìm thấy tài khoản", Toast.LENGTH_SHORT).show();
+                                }
+                                else if(errorCode == 105){
+                                    Toast.makeText(context, "Thử lại", Toast.LENGTH_SHORT).show();
+                                }
+                                else if(errorCode == 100){
+                                    Toast.makeText(context, "Check mail để lấy mật khẩu", Toast.LENGTH_SHORT).show();
+                                }
+                                else {
+                                    Toast.makeText(context, "Lỗi hệ thống", Toast.LENGTH_SHORT).show();
+                                }
+
                             }
                         });
                     }

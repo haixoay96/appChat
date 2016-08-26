@@ -1,5 +1,6 @@
 package com.example.duclinh.appchat.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -8,6 +9,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.duclinh.appchat.R;
 import com.example.duclinh.appchat.fragment.ForgetPasswordFragment;
@@ -45,6 +47,13 @@ public class MainActivity extends AppCompatActivity {
                 if(!MyApplication.socket.connected()){
                     MyApplication.socket.connect();
                 }
+                final ProgressDialog progressDialog = new ProgressDialog( MainActivity.this, R.style.AppTheme_Dark_Dialog);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setMessage("Authenticating...");
+                progressDialog.setCancelable(false);
+                progressDialog.setCanceledOnTouchOutside(false);
+                progressDialog.show();
+
                 final String textAccount = account.getText().toString();
                 final String textPassword = password.getText().toString();
                 final JSONObject jsonObject = new JSONObject();
@@ -59,9 +68,11 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 MyApplication.socket.emit("login", jsonObject);
+                MyApplication.socket.off("resultLogin");
                 MyApplication.socket.once("resultLogin", new Emitter.Listener() {
                     @Override
                     public void call(final Object... args) {
+                        progressDialog.dismiss();
                         MainActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -78,6 +89,15 @@ public class MainActivity extends AppCompatActivity {
                                         intent.putExtra("password",textPassword);
                                         startActivity(intent);
                                         finish();
+                                    }
+                                    else if(statusCode == 103){
+                                        Toast.makeText(MainActivity.this, "Sai tên hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+
+                                    }
+                                    else {
+                                        //case eles
+                                        Toast.makeText(MainActivity.this, "Lỗi hệ thống", Toast.LENGTH_SHORT).show();
+
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();

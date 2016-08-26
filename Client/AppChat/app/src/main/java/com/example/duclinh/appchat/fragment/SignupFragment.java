@@ -1,6 +1,7 @@
 package com.example.duclinh.appchat.fragment;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -81,6 +82,13 @@ public class SignupFragment extends DialogFragment {
                 if(!MyApplication.socket.connected()){
                     MyApplication.socket.connect();
                 }
+                final ProgressDialog progressDialog = new ProgressDialog(context, R.style.AppTheme_Dark_Dialog);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setMessage("Authenticating...");
+                progressDialog.setCancelable(false);
+                progressDialog.setCanceledOnTouchOutside(false);
+                progressDialog.show();
+
                 final String textAccoun = account.getText().toString();
                 final String textPassword = password.getText().toString();
                 String textRePassword = rePassword.getText().toString();
@@ -107,6 +115,7 @@ public class SignupFragment extends DialogFragment {
                 MyApplication.socket.once("resultSignUp", new Emitter.Listener() {
                     @Override
                     public void call(final Object... args) {
+                        progressDialog.dismiss();
                         ((Activity)context).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -119,17 +128,20 @@ public class SignupFragment extends DialogFragment {
                                 }
                                 if(errorCode == 100){
                                     // when sigup successfull
+                                    Toast.makeText(context, "Tao tai khoan thanh cong", Toast.LENGTH_SHORT).show();
                                 }
                                 else if (errorCode == 101){
                                     /// when account already exist
+                                    Toast.makeText(context, "Tài khoản đã tồn tại", Toast.LENGTH_SHORT).show();
                                 }
                                 else if(errorCode == 102){
                                     /// when email error
+                                    Toast.makeText(context, "Email không hợp lệ", Toast.LENGTH_SHORT).show();
                                 }
                                 else {
                                     // when app error
+                                    Toast.makeText(context, "Hệ thống bị lỗi", Toast.LENGTH_SHORT).show();
                                 }
-                                Toast.makeText(context, args[0]+ "", Toast.LENGTH_SHORT).show();
 
                             }
                         });

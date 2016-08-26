@@ -9,6 +9,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.example.duclinh.appchat.R;
+import com.example.duclinh.appchat.data.Account;
 import com.example.duclinh.appchat.orther.MyApplication;
 import com.squareup.picasso.Picasso;
 
@@ -16,17 +17,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by haixo on 8/13/2016.
  */
 public class AdapterUsersOnline extends RecyclerView.Adapter<AdapterUsersOnline.MyViewHolder> {
-    private JSONArray listUsersOnlines;
+    private ArrayList<Account> list;
     private ViewGroup parent;
 
-    public AdapterUsersOnline(JSONArray listUsersOnlines) {
-        this.listUsersOnlines = listUsersOnlines;
+    public AdapterUsersOnline(ArrayList<Account> list) {
+        this.list = list;
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
@@ -75,23 +78,17 @@ public class AdapterUsersOnline extends RecyclerView.Adapter<AdapterUsersOnline.
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        try {
-            JSONObject object = listUsersOnlines.getJSONObject(position);
-            Picasso.with(parent.getContext()).load(MyApplication.HOST+object.getString("avatar")).resize(500,500).into(holder.getAvatar());
-            holder.getAccount().setText(object.getString("account"));
-            holder.getStatus().setText("Cuoi len");
-
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        Account account = list.get(position);
+        Picasso.with(parent.getContext()).load(MyApplication.HOST+account.getAvatar()).resize(500,500).into(holder.getAvatar());
+        holder.getAccount().setText(account.getNameAccount());
+        holder.getStatus().setText("Cuoi len");
         Animation animAnticipateOvershoot = AnimationUtils.loadAnimation(parent.getContext(), R.anim.anticipateovershoot_interpolator);
         holder.itemView.setAnimation(animAnticipateOvershoot);
     }
 
     @Override
     public int getItemCount() {
-        return listUsersOnlines.length();
+        return list.size();
     }
 
 

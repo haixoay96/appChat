@@ -190,10 +190,10 @@ io.on('connection', function (socket) {
 			socket:socket.id
 		});
 		if(indexSender!==-1){
+			socket.emit('resultSendMessage', data);
 			var receiver = data.account;
 			data.account = listUsersOnline[indexSender].account;
 			socket.broadcast.to(receiver).emit('receiveMessage', data);
-			socket.emit('resultSendMessage', data);
 		}
 		
 	});
@@ -202,10 +202,10 @@ io.on('connection', function (socket) {
 				socket:socket.id
 			});
 			if(index!==-1){
+				console.log('disconnect' + socket.id + ' '+ listUsersOnline[index].account);
 				socket.broadcast.emit('removeUser', listUsersOnline[index]);
 				listUsersOnline.splice(index,1);
-				console.log('disconnect');
-				console.log(listUsersOnline);
+				console.log( 'List ' + listUsersOnline);
 			}
 			
 	});

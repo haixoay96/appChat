@@ -3,11 +3,9 @@ package com.example.duclinh.appchat.activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -18,7 +16,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -26,25 +23,27 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.duclinh.appchat.R;
-import com.example.duclinh.appchat.adapter.AdapterListMessageChat;
 import com.example.duclinh.appchat.adapter.AdapterUsersOnline;
-import com.example.duclinh.appchat.designnotifi.CenterManagerMessage;
+import com.example.duclinh.appchat.data.Account;
+import com.example.duclinh.appchat.data.FormMessage;
+import com.example.duclinh.appchat.designnotifi.receivermessage.CenterManager;
 import com.example.duclinh.appchat.fragment.ScreenChatFragment;
 import com.example.duclinh.appchat.orther.DividerItemDecoration;
 import com.example.duclinh.appchat.orther.MyApplication;
 import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class UsersOnlineActivity extends AppCompatActivity {
-    private CenterManagerMessage centerManagerMessage;
+    private CenterManager centerManagerMessage;
     private Toolbar toolbar;
     private RecyclerView listUsers;
     private AdapterUsersOnline adapterUsersOnline;
-    private JSONArray listUsersOnline;
+    private ArrayList<Account> listAccount;
     private SwipeRefreshLayout swipeRefresh;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -64,18 +63,25 @@ public class UsersOnlineActivity extends AppCompatActivity {
         MyApplication.socket.disconnect();
         finish();
     }
-
     private void handleLogic() {
         // init center notifi message
-        centerManagerMessage = new CenterManagerMessage();
+        centerManagerMessage = new CenterManager();
         // get data users online
         try {
-            listUsersOnline = new JSONArray(getIntent().getStringExtra("listUsersOnline"));
+            JSONArray listUsersOnline = new JSONArray(getIntent().getStringExtra("listUsersOnline"));
+            listAccount = new ArrayList<Account>();
+            for(int i = 0 ;  i< listUsersOnline.length(); i++){
+                JSONObject object =  listUsersOnline.getJSONObject(i);
+                Account account = new Account(object.getString("account"),object.getString("avatar"));
+                listAccount.add(account);
+                centerManagerMessage.addClient(account);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         setSupportActionBar(toolbar);
-        adapterUsersOnline = new AdapterUsersOnline(listUsersOnline);
+        adapterUsersOnline = new AdapterUsersOnline(listAccount);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         listUsers.setLayoutManager(layoutManager);
         listUsers.setItemAnimator(new DefaultItemAnimator());
@@ -91,7 +97,14 @@ public class UsersOnlineActivity extends AppCompatActivity {
         MyApplication.socket.on("addUser", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
-                listUsersOnline.put(args[0]);
+                JSONObject object = (JSONObject) args[0];
+                try {
+                    Account account = new Account(object.getString("account"), object.getString("avatar"));
+                    listAccount.add(account);
+                    centerManagerMessage.addClient(account);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 UsersOnlineActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -108,19 +121,21 @@ public class UsersOnlineActivity extends AppCompatActivity {
             @Override
             public void call(Object... args) {
                 JSONObject object = (JSONObject) args[0];
-                int index = -1;
-                for(int i = 0 ; i<listUsersOnline.length(); i++ ){
-                    try {
-                        JSONObject jsonObject = (JSONObject) listUsersOnline.get(i);
-                        if(object.getString("account").equals(jsonObject.getString("account"))){
-                            index = i;
-                            break;
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                String nameAccount =null;
+                try {
+                   nameAccount = object.getString("account");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                int i;
+                int length = listAccount.size();
+                for( i = 0; i<length; i++ ){
+                    if(listAccount.get(i).getNameAccount().equals(nameAccount)){
+                        break;
                     }
                 }
-                listUsersOnline.remove(index);
+                centerManagerMessage.removeClient(listAccount.get(i));
+                listAccount.remove(i);
                 UsersOnlineActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -137,12 +152,6 @@ public class UsersOnlineActivity extends AppCompatActivity {
                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
                    @Override
                    public void run() {
-                       NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(UsersOnlineActivity.this)
-                               .setSmallIcon(R.drawable.small)
-                               .setContentTitle("message")
-                               .setContentText("Thong bao");
-                       NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                       notificationManager.notify(3, builder.build());
                        JSONObject object = (JSONObject) args[0];
                        String account = null;
                        String message = null;
@@ -152,9 +161,37 @@ public class UsersOnlineActivity extends AppCompatActivity {
                        } catch (JSONException e) {
                            e.printStackTrace();
                        }
-                       centerManagerMessage.notifiAllClient(account, message);
+                       centerManagerMessage.notifiAllClient(account, message, 2);
+                       NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(UsersOnlineActivity.this)
+                               .setSmallIcon(R.drawable.message)
+                               .setContentTitle(account)
+                               .setContentText(message);
+                       NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                       notificationManager.notify(1,builder.build());
                    }
                });
+            }
+        });
+
+        MyApplication.socket.off("resultSendMessage");
+        MyApplication.socket.on("resultSendMessage", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                UsersOnlineActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject object = (JSONObject) args[0];
+                        String account = null;
+                        String message = null;
+                        try {
+                            account =object.getString("account");
+                            message= object.getString("message");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        centerManagerMessage.notifiAllClient(account, message, 1);
+                    }
+                });
             }
         });
 
@@ -185,14 +222,10 @@ public class UsersOnlineActivity extends AppCompatActivity {
             @Override
             public void onClick(View view, int position) {
                 Toast.makeText(UsersOnlineActivity.this, position +"", Toast.LENGTH_SHORT).show();
-                try {
-                    String account = ((JSONObject)listUsersOnline.get(position)).getString("account");
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-                    ScreenChatFragment screenChatFragment = ScreenChatFragment.newInstance(account,centerManagerMessage);
-                    screenChatFragment.show(fragmentManager, account);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                String account = listAccount.get(position).getNameAccount();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                ScreenChatFragment screenChatFragment = ScreenChatFragment.newInstance(account,centerManagerMessage, listAccount.get(position).getList());
+                screenChatFragment.show(fragmentManager, account);
             }
 
             @Override
